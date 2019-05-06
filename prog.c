@@ -33,7 +33,7 @@ typedef struct bmpDataStruct
 	DWORD  	important_colors;
 } bmpData;
 
-void fgetData(FILE*, bmpData*); 
+void fgetData(FILE*, bmpData*, byte*); 
 
 const byte headerSize = 54;
 
@@ -52,7 +52,7 @@ int main()
 	byte header[headerSize];
 	
 	printf("\nInput file data:\n");
-	fgetData(ifp, &bmp);
+	fgetData(ifp, &bmp, header);
 	printf("bmp Magic number = %4x\nbmp width = %u\nbmp height = %u\nbmp size = %u bytes\nbmp image size = %u\n", 
 		bmp.magicNum, bmp.width, bmp.height, bmp.fileSize, bmp.imgSize);
 	
@@ -99,7 +99,7 @@ int main()
 	fwrite(ofp, sizeof(byte), imgSize, ofp);
 	puts("Output file generated!");
 	printf("\nOutput file data:\n");
-	fgetData(ofp, &bmp);
+	fgetData(ofp, &bmp, header);
 	printf("bmp Magic number = %4x\nbmp width = %u\nbmp height = %u\nbmp size = %u bytes\nbmp image size = %u\n", 
 		bmp.magicNum, bmp.width, bmp.height, bmp.fileSize, bmp.imgSize);
 	fclose(ofp);
@@ -109,26 +109,25 @@ int main()
 	return 0;
 }
 
-void fgetData(FILE *ifp_c, bmpData *Data)
+void fgetData(FILE *ifp_c, bmpData *Data, byte *header)
 {
 	bmpData *pData = Data;
-	byte header_c[headerSize];
-	fread(header_c, sizeof(byte), headerSize, ifp_c);
+	fread(header, sizeof(byte), headerSize, ifp_c);
 	
-	pData->magicNum = *(WORD*)&header_c[0];							
-	pData->fileSize = *(DWORD*)&header_c[2];                        
-	pData->rsvd1 = *(WORD*)&header_c[6];                                
-	pData->rsvd2 = *(WORD*)&header_c[8];                                                
-	pData->offset = *(DWORD*)&header_c[10];                                                  
-	pData->dib = *(DWORD*)&header_c[14];                            
-	pData->width = *(int*)&header_c[18];                            
-	pData->height = *(int*)&header_c[22];                           
-	pData->num_planes = *(WORD*)&header_c[26];                       
-	pData->bppx = *(WORD*)&header_c[28];                                                   
-	pData->compType = *(DWORD*)&header_c[30];                                                
-	pData->imgSize = *(DWORD*)&header_c[34];                        
-	pData->x_res = *(DWORD*)&header_c[38];                          
-	pData->y_res = *(DWORD*)&header_c[42];                        
-	pData->num_colors = *(DWORD*)&header_c[46];                                              
-	pData->important_colors = *(DWORD*)&header_c[50];                                   
+	pData->magicNum = *(WORD*)&header[0];							
+	pData->fileSize = *(DWORD*)&header[2];                        
+	pData->rsvd1 = *(WORD*)&header[6];                                
+	pData->rsvd2 = *(WORD*)&header[8];                                                
+	pData->offset = *(DWORD*)&header[10];                                                  
+	pData->dib = *(DWORD*)&header[14];                            
+	pData->width = *(int*)&header[18];                            
+	pData->height = *(int*)&header[22];                           
+	pData->num_planes = *(WORD*)&header[26];                       
+	pData->bppx = *(WORD*)&header[28];                                                   
+	pData->compType = *(DWORD*)&header[30];                                                
+	pData->imgSize = *(DWORD*)&header[34];                        
+	pData->x_res = *(DWORD*)&header[38];                          
+	pData->y_res = *(DWORD*)&header[42];                        
+	pData->num_colors = *(DWORD*)&header[46];                                              
+	pData->important_colors = *(DWORD*)&header[50];                                   
 }
