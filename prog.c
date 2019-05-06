@@ -55,19 +55,16 @@ int main()
 	fgetData(ifp, &bmp, header);
 	printf("bmp Magic number = %4x\nbmp width = %u\nbmp height = %u\nbmp size = %u bytes\nbmp image size = %u\n", 
 		bmp.magicNum, bmp.width, bmp.height, bmp.fileSize, bmp.imgSize);
-	
-	
-	DWORD imgSize = bmp.imgSize;
 
-	byte *ipxs = (byte*) calloc(imgSize, sizeof(byte));
+	byte *ipxs = (byte*) calloc(bmp.imgSize, sizeof(byte));
 	
-	fread(ipxs, sizeof(byte), imgSize, ifp);
+	fread(ipxs, sizeof(byte), bmp.imgSize, ifp);
 	
 	//close input file
 	fclose(ifp);
 	
 	//Invert the colors
-	for (size_t i = 0; i < (imgSize - 3); i += 3)
+	for (size_t i = 0; i < (bmp.imgSize); i += 3)
 	{
 		byte tmp = ipxs[i];
 		ipxs[i] = ipxs[i+2];
@@ -88,15 +85,15 @@ int main()
 		putc(header[i], ofp);
 	}
 	
-	byte *opxs = (byte*) calloc(imgSize, sizeof(byte));
+	byte *opxs = (byte*) calloc(bmp.imgSize, sizeof(byte));
 	
-	for(size_t i = 0; i < imgSize; ++i)
+	for(size_t i = 0; i < bmp.imgSize; ++i)
 	{
 		opxs[i] = 255 - ipxs[i];
 		putc(opxs[i], ofp);
 	}
 	
-	fwrite(ofp, sizeof(byte), imgSize, ofp);
+	fwrite(ofp, sizeof(byte), bmp.imgSize, ofp);
 	puts("Output file generated!");
 	printf("\nOutput file data:\n");
 	fgetData(ofp, &bmp, header);
