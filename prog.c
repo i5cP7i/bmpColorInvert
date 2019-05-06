@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+/*
 #ifndef ifBMP
-#define ifBMP	"C:\\Users\\11703088\\OneDrive - PXL\\Elektronica-ICT\\C_programmeren_2\\PE2\\BMP\\input.bmp"
+#define ifBMP	"C:\\Users\\11703088\\OneDrive - PXL\\Elektronica-ICT\\C_programmeren_2\\PE2\\BMP\\"
 #endif
-
+*/
 #ifndef ofBMP
 #define ofBMP	"C:\\Users\\11703088\\OneDrive - PXL\\Elektronica-ICT\\C_programmeren_2\\PE2\\BMP\\output.bmp"	
 #endif
@@ -36,12 +38,21 @@ typedef struct bmpDataStruct
 void fgetData(FILE*, bmpData*, byte*); 
 
 const byte headerSize = 54;
+const DWORD arr_size = 1024;
+
+char ifBMP[] = "C:\\Users\\11703088\\OneDrive - PXL\\Elektronica-ICT\\C_programmeren_2\\PE2\\BMP\\";
 
 int main()
 {
 	bmpData bmp;
-	FILE *ifp = fopen(ifBMP, "rb");
+	FILE *ifp;
 	
+	char *ifp_str = (char*) malloc(arr_size*sizeof(char));
+	
+	puts("Please provide a valid filename");
+	scanf("%s", ifp_str);
+	strcat(ifBMP, ifp_str);
+	ifp = fopen(ifBMP, "rb");
 	if (ifp == NULL)
 	{
 		printf("Could not open file %s\n", ifBMP);
@@ -49,13 +60,15 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	
+	free(ifp_str);
+	
 	byte header[headerSize];
 	
 	printf("\nInput file data:\n");
 	fgetData(ifp, &bmp, header);
 	printf("bmp Magic number = %4x\nbmp width = %u\nbmp height = %u\nbmp size = %u bytes\nbmp image size = %u\n", 
 		bmp.magicNum, bmp.width, bmp.height, bmp.fileSize, bmp.imgSize);
-
+	
 	byte *ipxs = (byte*) calloc(bmp.imgSize, sizeof(byte));
 	
 	fread(ipxs, sizeof(byte), bmp.imgSize, ifp);
@@ -79,6 +92,7 @@ int main()
 		system("pause");
 		exit(EXIT_FAILURE);
 	}
+	printf("\nOutput file generated!\n");
 	//Write bmp header
 	for (size_t i = 0; i < headerSize; ++i)
 	{
@@ -86,16 +100,19 @@ int main()
 	}
 	
 	byte *opxs = (byte*) calloc(bmp.imgSize, sizeof(byte));
-	
+	printf("Writing inverted pixels to file");
 	for(size_t i = 0; i < bmp.imgSize; ++i)
 	{
 		opxs[i] = 255 - ipxs[i];
 		putc(opxs[i], ofp);
+		if (i%(102400) == 0)
+		{
+			printf(".");
+		}
 	}
 	
 	fwrite(ofp, sizeof(byte), bmp.imgSize, ofp);
-	puts("Output file generated!");
-	printf("\nOutput file data:\n");
+	printf("\n\nOutput file data:\n");
 	fgetData(ofp, &bmp, header);
 	printf("bmp Magic number = %4x\nbmp width = %u\nbmp height = %u\nbmp size = %u bytes\nbmp image size = %u\n", 
 		bmp.magicNum, bmp.width, bmp.height, bmp.fileSize, bmp.imgSize);
