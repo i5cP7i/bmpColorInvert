@@ -8,6 +8,9 @@ typedef unsigned char 	byte; //FF
 typedef unsigned short 	WORD; //FF FF
 typedef unsigned		DWORD;//FF FF FF FF
 
+/*
+ * BMP header structure
+*/
 typedef struct bmpDataStruct
 {
 	WORD 	magicNum;
@@ -51,7 +54,7 @@ int main()
 	system("cls");
 	
 	printf("BMP COLOR INVERTER PROGRAM\n\n");
-	printf("This program inverts the colors of a BMP image and saves the new image to an output file named output.bmp\n"); 
+	printf("This program inverts the colors of a BMP image and prompts the user to provide a filename for the output file.\n"); 
 	puts("Please provide a valid filename.\nThe output file will be saved in the same directory of the provided bmp image file.\n");
 	printf("Current directory:\n %s", ifBMP);
 	scanf("%s", ifp_str);
@@ -66,6 +69,13 @@ int main()
 				system("pause");
 				exit(EXIT_FAILURE);
 			}
+			break;
+		}
+		else if (ifp_str[i + 1] == '\0')
+		{
+			puts("Invalid file extension! The file must be a bmp file (extension .bmp).");
+			system("pause");
+			exit(EXIT_FAILURE);
 		}
 	}
 	strcat(ifBMP, ifp_str);
@@ -79,10 +89,13 @@ int main()
 			break;
 		}
 	}
-	strcat(ofBMP, "output.bmp");
+	
+	char *ofp_str = (char*) malloc(arr_size*sizeof(char));
+	printf("Provide a filename. (The right extension will be automatically added)\n");
+	scanf("%s", ofp_str);
+	strcat(ofp_str, ".bmp");	 	
+	strcat(ofBMP, ofp_str);
 	ifp = fopen(ifBMP, "rb");
-	
-	
 	
 	if (ifp == NULL)
 	{
@@ -107,7 +120,7 @@ int main()
 	//close input file
 	fclose(ifp);
 	
-	//Invert the colors
+	//BGR to RGB
 	for (size_t i = 0; i < (bmp.imgSize); i += 3)
 	{
 		byte tpxs = ipxs[i];
@@ -161,33 +174,37 @@ int main()
 }
 
 /*
- *
+ *Description: This function reads the BMP header and stores it to the BMP structure  
+ *@param: file pointer, pointer to BMP structure, byte pointer to header array
+ *@return: void 
 */
 void fgetData(FILE *ifp_c, bmpData *Data, byte *header)
 {
 	bmpData *pData = Data;
 	fread(header, sizeof(byte), headerSize, ifp_c);
 	
-	pData->magicNum = *(WORD*)&header[0];				//%hu\n							
+	pData->magicNum = *(WORD*)&header[0];			//%hu\n							
 	pData->fileSize = *(DWORD*)&header[2];          	//%u\n             
-	pData->rsvd1 = *(WORD*)&header[6];					//%hu\n 	                               
-	pData->rsvd2 = *(WORD*)&header[8]; 					//%hu\n                                               
-	pData->offset = *(DWORD*)&header[10];				//%u\n                                                 
-	pData->dib = *(DWORD*)&header[14];					//%u\n                           
-	pData->width = *(int*)&header[18];					//%d\n                           
-	pData->height = *(int*)&header[22];					//%d\n                          
-	pData->num_planes = *(WORD*)&header[26];			//%hu\n                       
-	pData->bppx = *(WORD*)&header[28];					//%hu\n                                                   
-	pData->compType = *(DWORD*)&header[30];				//%u\n                                               
-	pData->imgSize = *(DWORD*)&header[34];				//%u\n                       
-	pData->x_res = *(DWORD*)&header[38];				//%u\n                         
-	pData->y_res = *(DWORD*)&header[42];				//%u\n                       
-	pData->num_colors = *(DWORD*)&header[46]; 			//%u\n                                            
+	pData->rsvd1 = *(WORD*)&header[6];			//%hu\n 	                               
+	pData->rsvd2 = *(WORD*)&header[8]; 			//%hu\n                                               
+	pData->offset = *(DWORD*)&header[10];			//%u\n                                                 
+	pData->dib = *(DWORD*)&header[14];			//%u\n                           
+	pData->width = *(int*)&header[18];			//%d\n                           
+	pData->height = *(int*)&header[22];			//%d\n                          
+	pData->num_planes = *(WORD*)&header[26];		//%hu\n                       
+	pData->bppx = *(WORD*)&header[28];			//%hu\n                                                   
+	pData->compType = *(DWORD*)&header[30];			//%u\n                                               
+	pData->imgSize = *(DWORD*)&header[34];			//%u\n                       
+	pData->x_res = *(DWORD*)&header[38];			//%u\n                         
+	pData->y_res = *(DWORD*)&header[42];			//%u\n                       
+	pData->num_colors = *(DWORD*)&header[46]; 		//%u\n                                            
 	pData->important_colors = *(DWORD*)&header[50];		//%u\n                                  
 }
 
 /*
- *
+ *Description: Prints the header structure 
+ *@param: pointer to BMP structure
+ *@return: void
 */
 void print_bmpData(bmpData *Data)
 {
